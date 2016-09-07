@@ -9,6 +9,7 @@
     |____/ \__, |  \____/ \____//_____|______/_/ \_\_|  |_|\____/ 
             __/ |                                                 
            |___/                                                  
+    plugin Not Completed
  */
 
 namespace UHCRunDP;
@@ -291,5 +292,9 @@ class Main extends PluginBase implements Listener{
 			}
 	
 		}
+	}
+	
+	public function onDisable(){
+		$this->getConfig()->save();
 	}
 }
