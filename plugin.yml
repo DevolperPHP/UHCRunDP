@@ -1,0 +1,10 @@
+---
+name: UHCRunDP
+author: JUZEXMOD
+main: JUZEXMOD\Main
+version: 1.0
+api: [2.0.0]
+
+commands:
+  uhc:
+    description: UHC Command
