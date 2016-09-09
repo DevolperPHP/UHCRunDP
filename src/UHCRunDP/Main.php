@@ -18,6 +18,11 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\block\Block;
+se pocketmine\scheduler\PluginTask;
+use pocketmine\Server; 
+use pocketmine\level\Level;
+use pocketmine\math\Vector3;
+use pocketmine\tile\Sign;
 use pocketmine\level\sound\AnvilUseSound;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -32,8 +37,13 @@ use pocketmine\utils\Config;
 
 class Main extends PluginBase implements Listener{
 	
+public $minute = 0;
+public $second = 0;
+public $counttype = "down";
+	
 	public function onEnable(){
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		$this->getServer()->getScheduler()->scheduleRepeatingTask(new Task($this), 20);
 		@mkdir($this->getDataFolder());
 		$player1 = [
 				
@@ -101,95 +111,207 @@ class Main extends PluginBase implements Listener{
 		$cfg->save();
 	}
 	
-	public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
-		if($cmd->getName() == 'uhc'){
-			switch(mt_rand(1,8)){
-				case 1:
-					$teamred = "Â§f[Â§lÂ§cREDÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamred" . $name);
-					$xp1 = $this->getConfig()->get("player1X");
-					$yp1 = $this->getConfig()->get("player1Y");
-					$zp1 = $this->getConfig()->get("player1Z");
-					$sender->teleport(new position($xp1, $yp1, $zp1));
-					$this->getConfig()->save();
-					break;
-					
-				case 2:
-					$teamred = "Â§f[Â§lÂ§cREDÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamred" . $name);
-					$xp2 = $this->getConfig()->get("player2X");
-					$yp2 = $this->getConfig()->get("player2Y");
-					$zp2 = $this->getConfig()->get("player2Z");
-					$sender->teleport(new position($xp2, $yp2, $zp2));
-					break;
-					
-				case 3:
-					$teamblue = "Â§f[Â§lÂ§9BLUEÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamblue" . $name);
-					$xp3 = $this->getConfig()->get("player3X");
-					$yp3 = $this->getConfig()->get("player3Y");
-					$zp3 = $this->getConfig()->get("player3Z");
-					$sender->teleport(new position($xp3, $yp3, $zp3));
-					$this->getConfig()->save();
-					break;
-					
-				case 4:
-					$teamblue = "Â§f[Â§lÂ§9BLUEÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamblue" . $name);
-					$xp4 = $this->getConfig()->get("player4X");
-					$yp4 = $this->getConfig()->get("player4Y");
-					$zp4 = $this->getConfig()->get("player4Z");
-					$sender->teleport(new position($xp4, $yp4, $zp4));
-					$this->getConfig()->save();
-					break;
-					
-				case 5:
-					$teamyellow = "Â§f[Â§lÂ§eYELLOWÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamyellow" . $name);
-					$xp5 = $this->getConfig()->get("player2X");
-					$yp5 = $this->getConfig()->get("player2Y");
-					$zp5 = $this->getConfig()->get("player2Z");
-					$sender->teleport(new position($xp5, $yp5, $zp5));
-					$this->getConfig()->save();
-					break;
-					
-				case 6:
-					$teamyellow = "Â§f[Â§lÂ§eYELLOWÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamyellow" . $name);
-					$xp6 = $this->getConfig()->get("player6X");
-					$yp6 = $this->getConfig()->get("player6Y");
-					$zp6 = $this->getConfig()->get("player6Z");
-					$sender->teleport(new position($xp6, $yp6, $zp6));
-					$this->getConfig()->save();
-					break;
-					
-				case 7:
-					$teamgreen = "Â§f[Â§lÂ§aGREENÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamgreen" . $name);
-					$xp7 = $this->getConfig()->get("player7X");
-					$yp7 = $this->getConfig()->get("player7Y");
-					$zp7 = $this->getConfig()->get("player7Z");
-					$sender->teleport(new position($xp7, $yp7, $zp7));
-					$this->getConfig()->save();
-					break;
-					
-				case 8:
-					$teamgreen = "Â§f[Â§lÂ§aGREENÂ§f]";
-					$name = $player->getName();
-					$sender->setNameTag("$teamgreen" . $name);
-					$xp8 = $this->getConfig()->get("player8X");
-					$yp8 = $this->getConfig()->get("player8Y");
-					$zp8 = $this->getConfig()->get("player8Z");
-					$sender->teleport(new position($xp8, $yp8, $zp8));
-					$this->getConfig()->save();
-			}
+	public function onCommand(CommandSender $player, Command $cmd, $label, array $args){
+		switch($cmd->getName()){
+			case 'uhc':
+				
+				if(isset($args[0])){
+					switch($args[0]){
+						
+						case 'join':
+							$teamred = "Â§f[Â§lÂ§cREDÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamred" . $name);
+                                                        $xp1 = $this->getConfig()->get("player1X");
+                                                        $yp1 = $this->getConfig()->get("player1Y");
+                                                        $zp1 = $this->getConfig()->get("player1Z");
+                                                        $player->teleport(new position($xp1, $yp1, $zp1));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamblue = "Â§f[Â§lÂ§9BLUEÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamblue" . $name);
+                                                        $xp3 = $this->getConfig()->get("player3X");
+                                                        $yp3 = $this->getConfig()->get("player3Y");
+                                                        $zp3 = $this->getConfig()->get("player3Z");
+                                                        $player->teleport(new position($xp3, $yp3, $zp3));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamyellow = "Â§f[Â§lÂ§eYELLOWÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamyellow" . $name);
+                                                        $xp5 = $this->getConfig()->get("player2X");
+                                                        $yp5 = $this->getConfig()->get("player2Y");
+                                                        $zp5 = $this->getConfig()->get("player2Z");
+                                                        $player->teleport(new position($xp5, $yp5, $zp5));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamgreen = "Â§f[Â§lÂ§aGREENÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamgreen" . $name);
+                                                        $xp7 = $this->getConfig()->get("player7X");
+                                                        $yp7 = $this->getConfig()->get("player7Y");
+                                                        $zp7 = $this->getConfig()->get("player7Z");
+                                                        $player->teleport(new position($xp7, $yp7, $zp7));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamred = "Â§f[Â§lÂ§cREDÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamred" . $name);
+                                                        $xp2 = $this->getConfig()->get("player2X");
+                                                        $yp2 = $this->getConfig()->get("player2Y");
+                                                        $zp2 = $this->getConfig()->get("player2Z");
+                                                        $player->teleport(new position($xp2, $yp2, $zp2));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamblue = "Â§f[Â§lÂ§9BLUEÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamblue" . $name);
+                                                        $xp4 = $this->getConfig()->get("player4X");
+                                                        $yp4 = $this->getConfig()->get("player4Y");
+                                                        $zp4 = $this->getConfig()->get("player4Z");
+                                                        $player->teleport(new position($xp4, $yp4, $zp4));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamyellow = "Â§f[Â§lÂ§eYELLOWÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamyellow" . $name);
+                                                        $xp6 = $this->getConfig()->get("player6X");
+                                                        $yp6 = $this->getConfig()->get("player6Y");
+                                                        $zp6 = $this->getConfig()->get("player6Z");
+                                                        $player->teleport(new position($xp6, $yp6, $zp6));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        break;
+                                                        
+                                                        $teamgreen = "Â§f[Â§lÂ§aGREENÂ§f]";
+                                                        $name = $player->getName();
+                                                        $player->setNameTag("$teamgreen" . $name);
+                                                        $xp8 = $this->getConfig()->get("player8X");
+                                                        $yp8 = $this->getConfig()->get("player8Y");
+                                                        $zp8 = $this->getConfig()->get("player8Z");
+                                                        $player->teleport(new position($xp8, $yp8, $zp8));
+                                                        $this->getConfig()->save();
+                                                        
+                                                        return true;
+                                                        
+                                                        case 'spawn':
+                                                        	
+                                                        	if(isset($args[0])){
+                                                        		switch($args[0]){
+                                                        			
+                                                        			case '1':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp1", $xp1);
+                                                        				$this->getConfig()->set("xp1", $yp1);
+                                                        				$this->getConfig()->set("xp1", $zp1);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '2':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp2", $xp2);
+                                                        				$this->getConfig()->set("xp2", $yp2);
+                                                        				$this->getConfig()->set("xp2", $zp2);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '3':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp3", $xp3);
+                                                        				$this->getConfig()->set("xp3", $yp3);
+                                                        				$this->getConfig()->set("xp3", $zp3);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '4':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp4", $xp4);
+                                                        				$this->getConfig()->set("xp4", $yp4);
+                                                        				$this->getConfig()->set("xp4", $zp4);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '5':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp5", $xp5);
+                                                        				$this->getConfig()->set("xp5", $yp5);
+                                                        				$this->getConfig()->set("xp5", $zp5);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '6':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp6", $xp6);
+                                                        				$this->getConfig()->set("xp6", $yp6);
+                                                        				$this->getConfig()->set("xp6", $zp6);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '7':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp7", $xp1);
+                                                        				$this->getConfig()->set("xp7", $yp1);
+                                                        				$this->getConfig()->set("xp7", $zp1);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        				return true;
+                                                        				
+                                                        			case '8':
+                                                        				$this->getConfig()->getFloorX();
+                                                        				$this->getConfig()->getFloorY();
+                                                        				$this->getConfig()->getFloorZ();
+                                                        				$this->getConfig()->set("xp8", $xp8);
+                                                        				$this->getConfig()->set("xp8", $yp8);
+                                                        				$this->getConfig()->set("xp8", $zp8);
+                                                        				$this->getConfig()->save();
+                                                        				
+                                                        		}
+                                                        	}
+                                                case 'teams':
+                                                	$player->sendMessage(§l§4 RED §9 BLUE §a GREEN §e YELLLOW);
+                                                	
+                                                case 'help':
+                                                	$player->sendMessage(§l§6 ]==============[§fU§cH§fC§6]==============[);
+                                                	$player->sendMessage(§l§c/uhc join: Join The Game);
+                                                	$player->sendMessage(§l§f/uhc spawn 1: set player spawn);
+                                                	$player->sendMessage(§l§c/uhc spawn 2: .../uhc spawn 8);
+                                                	$player->sendMessage(§l§f/uhc teams: sand Message Teams);
+                                                	$player->sendMessage(§l§6 ]==============[§fU§cH§fC§6]==============[);
+					}
+				}
 		}
 	}
 	
@@ -270,22 +392,22 @@ class Main extends PluginBase implements Listener{
 			if ($event->getEntity() instanceof Player && $event->getDamager() instanceof Player) {
 				$golpeado = $event->getEntity()->getNameTag();
 				$golpeador = $event->getDamager()->getNameTag();
-				if ((strpos($golpeado, "Â§f[Â§lÂ§cRedÂ§f]") !== false) && (strpos($golpeador, "Â§f[Â§lÂ§cRedÂ§f]") !== false)) {
+				if ((strpos($golpeado, "§f[§l§cRed§f]") !== false) && (strpos($golpeador, "§f[§l§cRed§f]") !== false)) {
 	
 					$event->setCancelled();
 				}
 	
-				else if ((strpos($golpeado, "Â§f[Â§lÂ§9BlueÂ§f]") !== false) && (strpos($golpeador, "Â§f[Â§lÂ§9BlueÂ§f]") !== false)) {
+				else if ((strpos($golpeado, "§f[§l§9Blue§f]") !== false) && (strpos($golpeador, "§f[§l§9Blue§f]") !== false)) {
 	
 					$event->setCancelled();
 				}
 	
-				else if ((strpos($golpeado, "Â§f[Â§lÂ§aGreenÂ§f]") !== false) && (strpos($golpeador, "Â§f[Â§lÂ§aGreenÂ§f]") !== false)) {
+				else if ((strpos($golpeado, "§f[§lÂ§aGreen§f]") !== false) && (strpos($golpeador, "§f[§l§aGreen§f]") !== false)) {
 	
 					$event->setCancelled();
 				}
 	
-				else if ((strpos($golpeado, "Â§f[Â§lÂ§eYellowÂ§f]") !== false) && (strpos($golpeador, "Â§f[Â§lÂ§eYellowÂ§f]") !== false)) {
+				else if ((strpos($golpeado, "§f[§l§eYellow§f]") !== false) && (strpos($golpeador, "§f[§l§eYellow§f]") !== false)) {
 	
 					$event->setCancelled();
 				}
@@ -294,7 +416,91 @@ class Main extends PluginBase implements Listener{
 		}
 	}
 	
+	public function onSignChange(SignChangeEvent $event){
+		$player = $event->getPlayer();
+		$sign = $event->getLine();
+		$name = $player->getName();
+		
+		if($player->isOp()){
+			if(strtolower(trim($event->()getLine(0))) == "UHC" || strtolower(trim($event->getLine(0))) == "[UHC]"){
+				$sign(0, "§l§f[U§cH§fC]");
+				$sign(1, "§l§a Welcome $name");
+				$sign(2, "§l§e Join UHC");
+				$sign(3, "§l§bTAB");
+				break;
+				$player->teleport(new position($xp1, $yp1, $zp1));
+				break;
+				$player->teleport(new position($xp2, $yp2, $zp2));
+				break;
+				$player->teleport(new position($xp3, $yp3, $zp3));
+				break;
+				$player->teleport(new position($xp4, $yp4, $zp4));
+				break;
+				$player->teleport(new position($xp5, $yp5, $zp5));
+				break;
+				$player->teleport(new position($xp6, $yp6, $zp6));
+				break;
+				$player->teleport(new position($xp7, $yp7, $zp7));
+				break;
+				$player->teleport(new position($xp8, $yp8, $zp8));
+				break;
+				
+		}
+	}
+	public function tick(){
+		$all = $this->getServer()->getLevelByName("Lobby")->getPlayers();
+                  if($this->counttype == "up"){
+                      $this->second++;
+                  }
+               if($this->counttype == "down"){
+                       $this->second--;
+                  }
+                  foreach($all as $p){
+
+               if($this->second < 60 && $this->second > 9){
+                   $p->sendTip($this->minute.":".$this->second);
+
+                 }
+               if($this->second < 10){
+                  $p->sendTip($this->minute.":0".$this->second);
+
+                 }
+               if($this->counttype == "down"){
+                  if($this->second == 0){
+
+                     $this->second = 60;
+                     $this->minute--;
+                 }}
+               if($this->counttype == "down"){
+                 if($this->second == 0){
+
+                   $this->second = 60;
+                   $this->minute--;
+                 }}
+               if($this->counttype == "up"){
+                  if($this->second == 60){
+
+                   $this->second = 0;
+                   $this->minute++;
+                 }}
+
+                 }}
+	
 	public function onDisable(){
 		$this->getConfig()->save();
 	}
+}
+
+class Main extends PluginTask{
+
+	public function __construct(Main $plugin){
+		parent::__construct($plugin);
+		$this->plugin = $plugin;
+
+	}
+
+    public function onRun($currentTick){
+    $this->plugin->tick();
+}
+
 }
