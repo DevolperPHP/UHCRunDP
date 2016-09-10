@@ -18,7 +18,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\block\Block;
-se pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\PluginTask;
 use pocketmine\Server; 
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
