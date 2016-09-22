@@ -17,6 +17,7 @@ namespace UHCRunDP;
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\block\Block;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\Server; 
@@ -38,7 +39,7 @@ use pocketmine\utils\Config;
 class Main extends PluginBase implements Listener{
 	
 public $minute = 0;
-public $second = 0;
+public $second = 30;
 public $counttype = "down";
 	
 	public function onEnable(){
@@ -427,23 +428,6 @@ public $counttype = "down";
 				$sign(1, "§l§a Welcome $name");
 				$sign(2, "§l§e Join UHC");
 				$sign(3, "§l§bTAB");
-				break;
-				$player->teleport(new position($xp1, $yp1, $zp1));
-				break;
-				$player->teleport(new position($xp2, $yp2, $zp2));
-				break;
-				$player->teleport(new position($xp3, $yp3, $zp3));
-				break;
-				$player->teleport(new position($xp4, $yp4, $zp4));
-				break;
-				$player->teleport(new position($xp5, $yp5, $zp5));
-				break;
-				$player->teleport(new position($xp6, $yp6, $zp6));
-				break;
-				$player->teleport(new position($xp7, $yp7, $zp7));
-				break;
-				$player->teleport(new position($xp8, $yp8, $zp8));
-				break;
 				
 		}
 	}
@@ -485,6 +469,34 @@ public $counttype = "down";
                  }}
 
                  }}
+                 
+        public function onTouchSign(PlayerInteractEvent $event){
+        	$player = $event->getPlayer();
+        	$sign = $event->getBlock()->getLevel()->getTile($event->getBlock());
+        	
+        	if($sign instanceof Sign){
+        		$text = $sign->getText();
+        		if($text === "§l§f[U§cH§fC]"){
+        			$player->teleport(new position($xp1, $yp1, $zp1));
+				break;
+				$player->teleport(new position($xp2, $yp2, $zp2));
+				break;
+				$player->teleport(new position($xp3, $yp3, $zp3));
+				break;
+				$player->teleport(new position($xp4, $yp4, $zp4));
+				break;
+				$player->teleport(new position($xp5, $yp5, $zp5));
+				break;
+				$player->teleport(new position($xp6, $yp6, $zp6));
+				break;
+				$player->teleport(new position($xp7, $yp7, $zp7));
+				break;
+				$player->teleport(new position($xp8, $yp8, $zp8));
+				break;
+        		}
+        		
+        	}
+        }
 	
 	public function onDisable(){
 		$this->getConfig()->save();
@@ -502,5 +514,19 @@ class Main extends PluginTask{
     public function onRun($currentTick){
     $this->plugin->tick();
 }
+    public function reload($lev){
+    
+            $name = $lev->getFolderName();
+            if ($this->plugin->getOwner()->getServer()->isLevelLoaded($name))
+            {
+                    $this->plugin->getOwner()->getServer()->unloadLevel($this->plugin->getOwner()->getServer()->getLevelByName($name));
+            }
+            $zip = new \ZipArchive;
+            $zip->extractTo($this->plugin->getOwner()->getServer()->getDataPath() . 'worlds');
+            $zip->close();
+            unset($zip);
+            $this->plugin->getOwner()->getServer()->loadLevel($name);
+            return true;
+    }
 
 }
